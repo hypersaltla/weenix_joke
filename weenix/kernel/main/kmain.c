@@ -124,7 +124,7 @@ bootstrap(int arg1, void *arg2)
         /* necessary to finalize page table information */
         pt_template_init();
 
-        NOT_YET_IMPLEMENTED("PROCS: bootstrap");
+        NOW_BUILDING("PROCS: bootstrap");
 
         panic("weenix returned to bootstrap()!!! BAD!!!\n");
         return NULL;

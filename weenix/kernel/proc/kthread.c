@@ -74,8 +74,15 @@ free_stack(char *stack)
 kthread_t *
 kthread_create(struct proc *p, kthread_func_t func, long arg1, void *arg2)
 {
-        NOT_YET_IMPLEMENTED("PROCS: kthread_create");
-        return NULL;
+
+	//  FINISHED_BUILDING("PROCS: kthread_create");
+    kthread_t *new_thread = (kthread *) slab_obj_alloc(kthread_allocator);
+	KASSERT(new_thread != NULL);
+	char *kstack = alloc_stack();
+	context_t *kthread_contex; // not allocate memory yet!
+	context_setup(kthread_contex,func,arg1,arg2,kstack,DEFAULT_STACK_SIZE,p->p_pagedir);
+	new_thread->kt_proc == p; // set the containing process
+	return new_thread;
 }
 
 void
@@ -103,7 +110,16 @@ kthread_destroy(kthread_t *t)
 void
 kthread_cancel(kthread_t *kthr, void *retval)
 {
-        NOT_YET_IMPLEMENTED("PROCS: kthread_cancel");
+	// FINISHED_BUILDING("PROCS: kthread_cancel");
+	if(kthr == curthr)
+		kthread_exit(retval);
+	else {
+		if(kthr->kt_state == KT_SLEEP_CANCELLABLE) {
+			sched_make_runnable(kthr);
+			kthr->kt_retval = retval;
+			kthr->kt_cancelled = 1;
+		}
+	}
 }
 
 /*
@@ -119,7 +135,11 @@ kthread_cancel(kthread_t *kthr, void *retval)
 void
 kthread_exit(void *retval)
 {
-        NOT_YET_IMPLEMENTED("PROCS: kthread_exit");
+    //  FINISHED_BUILDING("PROCS: kthread_exit");
+	curthr->kt_retval = retval; //set the retval
+	curthr->kt_state = KT_EXITED; // set the exited state
+	proc_thread_exited(retval); // alert the process
+//	kthread_destroy(curthr); // release the resource of thread
 }
 
 /*
